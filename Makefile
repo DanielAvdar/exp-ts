@@ -3,18 +3,21 @@
 .PHONY: all install test lint format check pre-commit-setup clean compile watch help coverage
 
 # Default target
-all: compile
+all: install-and-compile
+
+# Install dependencies and compile (new default target)
+install-and-compile: install compile
 
 # Install dependencies
 install:
 	npm install
-
+	npm run compile
 # Compile the extension
 compile:
 	npm run compile
 
 # Watch for changes
-watch:
+watch: install
 	npm run watch
 
 # Run tests
@@ -69,6 +72,7 @@ help:
 	@echo "Available commands:"
 	@echo "  make              - Compile TypeScript code (default)"
 	@echo "  make install      - Install dependencies"
+	@echo "  make install-and-compile - Install dependencies and compile TypeScript code"
 	@echo "  make compile      - Compile TypeScript code"
 	@echo "  make watch        - Watch for changes and compile automatically"
 	@echo "  make test         - Run tests (compiles first)"
