@@ -1,0 +1,108 @@
+{
+	"name": "vsc-chat",
+	"displayName": "VS Code LLM Chat",
+	"description": "Chat with multiple LLM providers directly within VS Code",
+	"version": "0.0.1",
+	"publisher": "vscode-samples",
+	"repository": "https://github.com/Microsoft/vscode-extension-samples/helloworld-sample",
+	"engines": {
+		"vscode": "^1.74.0"
+	},
+	"categories": [
+		"Other"
+	],
+	"activationEvents": [],
+	"main": "./out/extension.js",
+	"contributes": {
+		"commands": [
+			{
+				"command": "vsc-chat.openChat",
+				"title": "Open LLM Chat"
+			},
+			{
+				"command": "vsc-chat.selectProvider",
+				"title": "Select LLM Provider"
+			}
+		],
+		"viewsContainers": {
+			"panel": [
+				{
+					"id": "llm-chat-panel",
+					"title": "LLM Chat",
+					"icon": "$(comment-discussion)"
+				}
+			]
+		},
+		"views": {
+			"llm-chat-panel": [
+				{
+					"id": "llm-chat-view",
+					"name": "Chat"
+				}
+			]
+		},
+		"configuration": {
+			"title": "LLM Chat",
+			"properties": {
+				"vsc-chat.defaultProvider": {
+					"type": "string",
+					"default": "openai",
+					"enum": [
+						"openai",
+						"anthropic",
+						"local"
+					],
+					"enumDescriptions": [
+						"OpenAI (ChatGPT, GPT-4)",
+						"Anthropic (Claude)",
+						"Local models (Ollama, etc.)"
+					],
+					"description": "Default LLM provider to use"
+				},
+				"vsc-chat.openai.apiKey": {
+					"type": "string",
+					"default": "",
+					"description": "API key for OpenAI"
+				},
+				"vsc-chat.anthropic.apiKey": {
+					"type": "string",
+					"default": "",
+					"description": "API key for Anthropic"
+				},
+				"vsc-chat.local.endpoint": {
+					"type": "string",
+					"default": "http://localhost:11434",
+					"description": "Endpoint for local model (e.g., Ollama)"
+				}
+			}
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./",
+		"pretest": "npm run compile",
+		"test": "vscode-test",
+		"coverage": "nyc npm run test",
+		"lint": "eslint src --ext ts"
+	},
+	"dependencies": {
+		"axios": "^1.6.0",
+		"marked": "^11.1.0"
+	},
+	"devDependencies": {
+		"@eslint/js": "^9.13.0",
+		"@istanbuljs/nyc-config-typescript": "^1.0.2",
+		"@stylistic/eslint-plugin": "^2.9.0",
+		"@types/mocha": "^10.0.1",
+		"@types/node": "^20",
+		"@types/vscode": "^1.73.0",
+		"@vscode/test-cli": "^0.0.8",
+		"@vscode/test-electron": "^2.3.9",
+		"eslint": "^9.13.0",
+		"mocha": "^10.2.0",
+		"nyc": "^15.1.0",
+		"typescript": "^5.8.2",
+		"typescript-eslint": "^8.26.0"
+	}
+}
