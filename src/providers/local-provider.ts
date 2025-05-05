@@ -48,7 +48,7 @@ export class LocalProvider implements LLMProvider {
 
       // For Ollama
       const response = await axios.get(`${this.settings.endpoint}/api/tags`);
-      return response.data.models.map((model: any) => model.name);
+      return response.data.models.map((model: { name: string }) => model.name);
     } catch (error) {
       console.error('Error fetching models:', error);
       return ['llama3', 'mistral', 'gemma'];
@@ -96,7 +96,7 @@ export class LocalProvider implements LLMProvider {
     try {
       await this.getAvailableModels();
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

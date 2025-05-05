@@ -113,7 +113,7 @@ export class AnthropicProvider implements LLMProvider {
       });
 
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   }

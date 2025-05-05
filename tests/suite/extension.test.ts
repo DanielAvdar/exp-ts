@@ -1,9 +1,5 @@
 import * as assert from 'assert';
-
-// You can import and use all API from the 'vscode' module
-// as well as import your extension to test it
 import * as vscode from 'vscode';
-// import * as myExtension from '../../src/extension';
 
 suite('Extension Test Suite', () => {
   vscode.window.showInformationMessage('Start all tests.');
@@ -11,5 +7,27 @@ suite('Extension Test Suite', () => {
   test('Sample test', () => {
     assert.strictEqual([1, 2, 3].indexOf(5), -1);
     assert.strictEqual([1, 2, 3].indexOf(0), -1);
+  });
+});
+
+suite('Extension Integration Test', () => {
+  test('Extension should be activated', async () => {
+    // Get the extension
+    const extension = vscode.extensions.getExtension('vscode-samples.vsc-chat');
+    assert.ok(extension);
+
+    // Ensure it's activated
+    if (!extension.isActive) {
+      await extension.activate();
+    }
+    assert.ok(extension.isActive);
+  });
+
+  test('Should have registered commands', () => {
+    // Test that commands are registered
+    return vscode.commands.getCommands(true).then(commands => {
+      assert.ok(commands.includes('vsc-chat.openChat'));
+      assert.ok(commands.includes('vsc-chat.selectProvider'));
+    });
   });
 });
