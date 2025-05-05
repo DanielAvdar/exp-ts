@@ -21,12 +21,8 @@ jobs:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
 
-      # Install xvfb for running VS Code tests in headless environments
-      - name: Install xvfb
-        run: sudo apt-get install -y xvfb
-
-      - run: make install
-      - name: Run tests with xvfb
-        run: xvfb-run -a make test
+      - run: sudo apt-get install -y xvfb
+      - run: make
+      - run: xvfb-run -a make test
         
     continue-on-error: true
