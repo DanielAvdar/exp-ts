@@ -1,405 +1,407 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LLM Chat</title>
     <style>
-        body {
-            font-family: var(--vscode-font-family);
-            color: var(--vscode-editor-foreground);
-            background-color: var(--vscode-editor-background);
-            padding: 0;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
+      body {
+        font-family: var(--vscode-font-family);
+        color: var(--vscode-editor-foreground);
+        background-color: var(--vscode-editor-background);
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px;
+        background-color: var(--vscode-editor-background);
+        border-bottom: 1px solid var(--vscode-panel-border);
+      }
+      .provider-selector {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .provider-selector select {
+        background-color: var(--vscode-dropdown-background);
+        color: var(--vscode-dropdown-foreground);
+        border: 1px solid var(--vscode-dropdown-border);
+        padding: 4px 8px;
+        border-radius: 2px;
+      }
+      .model-selector {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .model-selector select {
+        background-color: var(--vscode-dropdown-background);
+        color: var(--vscode-dropdown-foreground);
+        border: 1px solid var(--vscode-dropdown-border);
+        padding: 4px 8px;
+        border-radius: 2px;
+      }
+      .header-buttons {
+        display: flex;
+        gap: 8px;
+      }
+      .header-button {
+        background-color: transparent;
+        color: var(--vscode-button-foreground);
+        border: none;
+        cursor: pointer;
+        padding: 4px 8px;
+        border-radius: 2px;
+      }
+      .chat-container {
+        flex: 1;
+        overflow-y: auto;
+        padding: 16px;
+      }
+      .message {
+        margin-bottom: 16px;
+        padding: 8px 12px;
+        border-radius: 4px;
+        max-width: 80%;
+      }
+      .user-message {
+        background-color: var(--vscode-badge-background);
+        color: var(--vscode-badge-foreground);
+        align-self: flex-end;
+        margin-left: auto;
+      }
+      .assistant-message {
+        background-color: var(--vscode-editor-inactiveSelectionBackground);
+        color: var(--vscode-editor-foreground);
+        align-self: flex-start;
+      }
+      .message-content {
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+      .message-role {
+        font-weight: bold;
+        margin-bottom: 4px;
+        font-size: 0.8em;
+        text-transform: uppercase;
+      }
+      .input-container {
+        padding: 16px;
+        border-top: 1px solid var(--vscode-panel-border);
+        background-color: var(--vscode-editor-background);
+      }
+      .input-box {
+        display: flex;
+        gap: 8px;
+      }
+      .input-box textarea {
+        flex: 1;
+        background-color: var(--vscode-input-background);
+        color: var(--vscode-input-foreground);
+        border: 1px solid var(--vscode-input-border);
+        padding: 8px;
+        border-radius: 2px;
+        resize: none;
+        min-height: 60px;
+      }
+      .input-box button {
+        background-color: var(--vscode-button-background);
+        color: var(--vscode-button-foreground);
+        border: none;
+        padding: 8px 16px;
+        border-radius: 2px;
+        cursor: pointer;
+      }
+      .input-box button:hover {
+        background-color: var(--vscode-button-hoverBackground);
+      }
+      .markdown-body pre {
+        background-color: var(--vscode-textBlockQuote-background);
+        padding: 8px;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
+      .markdown-body code {
+        font-family: var(--vscode-editor-font-family);
+        background-color: var(--vscode-textBlockQuote-background);
+        padding: 2px 4px;
+        border-radius: 2px;
+      }
+      .loader {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--vscode-progressBar-background);
+        border-radius: 50%;
+        border-top-color: var(--vscode-progressBar-background);
+        animation: spin 1s ease-in-out infinite;
+        margin-right: 8px;
+        vertical-align: middle;
+      }
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
         }
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            background-color: var(--vscode-editor-background);
-            border-bottom: 1px solid var(--vscode-panel-border);
-        }
-        .provider-selector {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .provider-selector select {
-            background-color: var(--vscode-dropdown-background);
-            color: var(--vscode-dropdown-foreground);
-            border: 1px solid var(--vscode-dropdown-border);
-            padding: 4px 8px;
-            border-radius: 2px;
-        }
-        .model-selector {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .model-selector select {
-            background-color: var(--vscode-dropdown-background);
-            color: var(--vscode-dropdown-foreground);
-            border: 1px solid var(--vscode-dropdown-border);
-            padding: 4px 8px;
-            border-radius: 2px;
-        }
-        .header-buttons {
-            display: flex;
-            gap: 8px;
-        }
-        .header-button {
-            background-color: transparent;
-            color: var(--vscode-button-foreground);
-            border: none;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 2px;
-        }
-        .chat-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-        }
-        .message {
-            margin-bottom: 16px;
-            padding: 8px 12px;
-            border-radius: 4px;
-            max-width: 80%;
-        }
-        .user-message {
-            background-color: var(--vscode-badge-background);
-            color: var(--vscode-badge-foreground);
-            align-self: flex-end;
-            margin-left: auto;
-        }
-        .assistant-message {
-            background-color: var(--vscode-editor-inactiveSelectionBackground);
-            color: var(--vscode-editor-foreground);
-            align-self: flex-start;
-        }
-        .message-content {
-            white-space: pre-wrap;
-            word-break: break-word;
-        }
-        .message-role {
-            font-weight: bold;
-            margin-bottom: 4px;
-            font-size: 0.8em;
-            text-transform: uppercase;
-        }
-        .input-container {
-            padding: 16px;
-            border-top: 1px solid var(--vscode-panel-border);
-            background-color: var(--vscode-editor-background);
-        }
-        .input-box {
-            display: flex;
-            gap: 8px;
-        }
-        .input-box textarea {
-            flex: 1;
-            background-color: var(--vscode-input-background);
-            color: var(--vscode-input-foreground);
-            border: 1px solid var(--vscode-input-border);
-            padding: 8px;
-            border-radius: 2px;
-            resize: none;
-            min-height: 60px;
-        }
-        .input-box button {
-            background-color: var(--vscode-button-background);
-            color: var(--vscode-button-foreground);
-            border: none;
-            padding: 8px 16px;
-            border-radius: 2px;
-            cursor: pointer;
-        }
-        .input-box button:hover {
-            background-color: var(--vscode-button-hoverBackground);
-        }
-        .markdown-body pre {
-            background-color: var(--vscode-textBlockQuote-background);
-            padding: 8px;
-            border-radius: 4px;
-            overflow-x: auto;
-        }
-        .markdown-body code {
-            font-family: var(--vscode-editor-font-family);
-            background-color: var(--vscode-textBlockQuote-background);
-            padding: 2px 4px;
-            border-radius: 2px;
-        }
-        .loader {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid var(--vscode-progressBar-background);
-            border-radius: 50%;
-            border-top-color: var(--vscode-progressBar-background);
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 8px;
-            vertical-align: middle;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="header">
-        <div class="provider-selector">
-            <label for="provider">Provider:</label>
-            <select id="provider">
-                <option value="openai">OpenAI</option>
-                <option value="anthropic">Anthropic</option>
-                <option value="local">Local Model</option>
-            </select>
-        </div>
-        <div class="model-selector">
-            <label for="model">Model:</label>
-            <select id="model">
-                <!-- Will be populated dynamically -->
-            </select>
-        </div>
-        <div class="header-buttons">
-            <button class="header-button" id="clear-button">Clear Chat</button>
-            <button class="header-button" id="settings-button">Settings</button>
-        </div>
+      <div class="provider-selector">
+        <label for="provider">Provider:</label>
+        <select id="provider">
+          <option value="openai">OpenAI</option>
+          <option value="anthropic">Anthropic</option>
+          <option value="local">Local Model</option>
+        </select>
+      </div>
+      <div class="model-selector">
+        <label for="model">Model:</label>
+        <select id="model">
+          <!-- Will be populated dynamically -->
+        </select>
+      </div>
+      <div class="header-buttons">
+        <button class="header-button" id="clear-button">Clear Chat</button>
+        <button class="header-button" id="settings-button">Settings</button>
+      </div>
     </div>
-    
+
     <div class="chat-container" id="chat-container">
-        <!-- Chat messages will be added here -->
+      <!-- Chat messages will be added here -->
     </div>
-    
+
     <div class="input-container">
-        <div class="input-box">
-            <textarea id="user-input" placeholder="Type your message here..." rows="3"></textarea>
-            <button id="send-button">Send</button>
-        </div>
+      <div class="input-box">
+        <textarea id="user-input" placeholder="Type your message here..." rows="3"></textarea>
+        <button id="send-button">Send</button>
+      </div>
     </div>
 
     <script>
-        (function() {
-            // Get references to DOM elements
-            const vscode = acquireVsCodeApi();
-            const chatContainer = document.getElementById('chat-container');
-            const userInput = document.getElementById('user-input');
-            const sendButton = document.getElementById('send-button');
-            const providerSelect = document.getElementById('provider');
-            const modelSelect = document.getElementById('model');
-            const settingsButton = document.getElementById('settings-button');
-            const clearButton = document.getElementById('clear-button');
-            
-            // Store chat state
-            const state = {
-                messages: [],
-                currentProvider: 'openai',
-                currentModel: '',
-                models: [],
-                isLoading: false
-            };
-            
-            // Initialize from any previous state
-            const previousState = vscode.getState();
-            if (previousState) {
-                Object.assign(state, previousState);
-                renderMessages();
+      (function () {
+        // Get references to DOM elements
+        const vscode = acquireVsCodeApi();
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendButton = document.getElementById('send-button');
+        const providerSelect = document.getElementById('provider');
+        const modelSelect = document.getElementById('model');
+        const settingsButton = document.getElementById('settings-button');
+        const clearButton = document.getElementById('clear-button');
+
+        // Store chat state
+        const state = {
+          messages: [],
+          currentProvider: 'openai',
+          currentModel: '',
+          models: [],
+          isLoading: false,
+        };
+
+        // Initialize from any previous state
+        const previousState = vscode.getState();
+        if (previousState) {
+          Object.assign(state, previousState);
+          renderMessages();
+        }
+
+        // Set up event listeners
+        sendButton.addEventListener('click', sendMessage);
+        userInput.addEventListener('keydown', handleKeyDown);
+        providerSelect.addEventListener('change', changeProvider);
+        modelSelect.addEventListener('change', changeModel);
+        settingsButton.addEventListener('click', openSettings);
+        clearButton.addEventListener('click', clearChat);
+
+        // Initialize UI
+        providerSelect.value = state.currentProvider;
+        initializeChat();
+
+        function initializeChat() {
+          vscode.postMessage({
+            type: 'initialize',
+            provider: state.currentProvider,
+          });
+        }
+
+        function renderMessages() {
+          chatContainer.innerHTML = '';
+          state.messages.forEach(message => {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${message.role}-message`;
+
+            const roleDiv = document.createElement('div');
+            roleDiv.className = 'message-role';
+            roleDiv.textContent = message.role;
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content markdown-body';
+            contentDiv.innerHTML = message.content;
+
+            messageDiv.appendChild(roleDiv);
+            messageDiv.appendChild(contentDiv);
+            chatContainer.appendChild(messageDiv);
+          });
+
+          // Scroll to bottom
+          chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function setLoading(loading) {
+          state.isLoading = loading;
+          sendButton.disabled = loading;
+
+          if (loading) {
+            // Add a loading message
+            const loadingDiv = document.createElement('div');
+            loadingDiv.className = 'message assistant-message';
+            loadingDiv.id = 'loading-message';
+
+            const roleDiv = document.createElement('div');
+            roleDiv.className = 'message-role';
+            roleDiv.textContent = 'assistant';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+
+            const loaderSpan = document.createElement('span');
+            loaderSpan.className = 'loader';
+            contentDiv.appendChild(loaderSpan);
+            contentDiv.appendChild(document.createTextNode('Thinking...'));
+
+            loadingDiv.appendChild(roleDiv);
+            loadingDiv.appendChild(contentDiv);
+            chatContainer.appendChild(loadingDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+          } else {
+            // Remove loading message
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) {
+              loadingMessage.remove();
             }
-            
-            // Set up event listeners
-            sendButton.addEventListener('click', sendMessage);
-            userInput.addEventListener('keydown', handleKeyDown);
-            providerSelect.addEventListener('change', changeProvider);
-            modelSelect.addEventListener('change', changeModel);
-            settingsButton.addEventListener('click', openSettings);
-            clearButton.addEventListener('click', clearChat);
-            
-            // Initialize UI
-            providerSelect.value = state.currentProvider;
-            initializeChat();
-            
-            function initializeChat() {
-                vscode.postMessage({
-                    type: 'initialize',
-                    provider: state.currentProvider
-                });
-            }
-            
-            function renderMessages() {
-                chatContainer.innerHTML = '';
-                state.messages.forEach(message => {
-                    const messageDiv = document.createElement('div');
-                    messageDiv.className = `message ${message.role}-message`;
-                    
-                    const roleDiv = document.createElement('div');
-                    roleDiv.className = 'message-role';
-                    roleDiv.textContent = message.role;
-                    
-                    const contentDiv = document.createElement('div');
-                    contentDiv.className = 'message-content markdown-body';
-                    contentDiv.innerHTML = message.content;
-                    
-                    messageDiv.appendChild(roleDiv);
-                    messageDiv.appendChild(contentDiv);
-                    chatContainer.appendChild(messageDiv);
-                });
-                
-                // Scroll to bottom
-                chatContainer.scrollTop = chatContainer.scrollHeight;
-            }
-            
-            function setLoading(loading) {
-                state.isLoading = loading;
-                sendButton.disabled = loading;
-                
-                if (loading) {
-                    // Add a loading message
-                    const loadingDiv = document.createElement('div');
-                    loadingDiv.className = 'message assistant-message';
-                    loadingDiv.id = 'loading-message';
-                    
-                    const roleDiv = document.createElement('div');
-                    roleDiv.className = 'message-role';
-                    roleDiv.textContent = 'assistant';
-                    
-                    const contentDiv = document.createElement('div');
-                    contentDiv.className = 'message-content';
-                    
-                    const loaderSpan = document.createElement('span');
-                    loaderSpan.className = 'loader';
-                    contentDiv.appendChild(loaderSpan);
-                    contentDiv.appendChild(document.createTextNode('Thinking...'));
-                    
-                    loadingDiv.appendChild(roleDiv);
-                    loadingDiv.appendChild(contentDiv);
-                    chatContainer.appendChild(loadingDiv);
-                    chatContainer.scrollTop = chatContainer.scrollHeight;
-                } else {
-                    // Remove loading message
-                    const loadingMessage = document.getElementById('loading-message');
-                    if (loadingMessage) {
-                        loadingMessage.remove();
-                    }
-                }
-            }
-            
-            function sendMessage() {
-                const message = userInput.value.trim();
-                if (!message || state.isLoading) return;
-                
-                // Add user message to UI
-                addMessage('user', message);
-                
-                // Clear input
-                userInput.value = '';
-                
-                // Set loading state
-                setLoading(true);
-                
-                // Send message to extension
-                vscode.postMessage({
-                    type: 'sendMessage',
-                    message: message,
-                    provider: state.currentProvider,
-                    model: state.currentModel
-                });
-            }
-            
-            function handleKeyDown(event) {
-                if (event.key === 'Enter' && !event.shiftKey) {
-                    event.preventDefault();
-                    sendMessage();
-                }
-            }
-            
-            function addMessage(role, content) {
-                const message = { role, content };
-                state.messages.push(message);
-                vscode.setState(state);
-                renderMessages();
-            }
-            
-            function changeProvider() {
-                state.currentProvider = providerSelect.value;
-                vscode.setState(state);
-                
-                // Request models for this provider
-                vscode.postMessage({
-                    type: 'changeProvider',
-                    provider: state.currentProvider
-                });
-                
-                // Clear chat when changing providers
-                clearChat();
-            }
-            
-            function changeModel() {
-                state.currentModel = modelSelect.value;
-                vscode.setState(state);
-            }
-            
-            function openSettings() {
-                vscode.postMessage({
-                    type: 'openSettings'
-                });
-            }
-            
-            function clearChat() {
-                // Clear chat history in UI
-                state.messages = [];
-                vscode.setState(state);
-                renderMessages();
-                
-                // Clear chat history in extension
-                vscode.postMessage({
-                    type: 'clearHistory'
-                });
-            }
-            
-            // Handle messages from the extension
-            window.addEventListener('message', event => {
-                const message = event.data;
-                
-                switch (message.type) {
-                    case 'addMessage':
-                        setLoading(false);
-                        addMessage(message.role, message.content);
-                        break;
-                        
-                    case 'updateModels':
-                        state.models = message.models;
-                        modelSelect.innerHTML = '';
-                        
-                        message.models.forEach(model => {
-                            const option = document.createElement('option');
-                            option.value = model;
-                            option.textContent = model;
-                            modelSelect.appendChild(option);
-                        });
-                        
-                        // Select first model if none selected
-                        if (!state.currentModel && state.models.length > 0) {
-                            state.currentModel = state.models[0];
-                        }
-                        
-                        modelSelect.value = state.currentModel;
-                        vscode.setState(state);
-                        break;
-                        
-                    case 'error':
-                        setLoading(false);
-                        vscode.postMessage({
-                            type: 'showError',
-                            message: message.message
-                        });
-                        break;
-                }
-            });
-        }());
+          }
+        }
+
+        function sendMessage() {
+          const message = userInput.value.trim();
+          if (!message || state.isLoading) return;
+
+          // Add user message to UI
+          addMessage('user', message);
+
+          // Clear input
+          userInput.value = '';
+
+          // Set loading state
+          setLoading(true);
+
+          // Send message to extension
+          vscode.postMessage({
+            type: 'sendMessage',
+            message: message,
+            provider: state.currentProvider,
+            model: state.currentModel,
+          });
+        }
+
+        function handleKeyDown(event) {
+          if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            sendMessage();
+          }
+        }
+
+        function addMessage(role, content) {
+          const message = { role, content };
+          state.messages.push(message);
+          vscode.setState(state);
+          renderMessages();
+        }
+
+        function changeProvider() {
+          state.currentProvider = providerSelect.value;
+          vscode.setState(state);
+
+          // Request models for this provider
+          vscode.postMessage({
+            type: 'changeProvider',
+            provider: state.currentProvider,
+          });
+
+          // Clear chat when changing providers
+          clearChat();
+        }
+
+        function changeModel() {
+          state.currentModel = modelSelect.value;
+          vscode.setState(state);
+        }
+
+        function openSettings() {
+          vscode.postMessage({
+            type: 'openSettings',
+          });
+        }
+
+        function clearChat() {
+          // Clear chat history in UI
+          state.messages = [];
+          vscode.setState(state);
+          renderMessages();
+
+          // Clear chat history in extension
+          vscode.postMessage({
+            type: 'clearHistory',
+          });
+        }
+
+        // Handle messages from the extension
+        window.addEventListener('message', event => {
+          const message = event.data;
+
+          switch (message.type) {
+            case 'addMessage':
+              setLoading(false);
+              addMessage(message.role, message.content);
+              break;
+
+            case 'updateModels':
+              state.models = message.models;
+              modelSelect.innerHTML = '';
+
+              message.models.forEach(model => {
+                const option = document.createElement('option');
+                option.value = model;
+                option.textContent = model;
+                modelSelect.appendChild(option);
+              });
+
+              // Select first model if none selected
+              if (!state.currentModel && state.models.length > 0) {
+                state.currentModel = state.models[0];
+              }
+
+              modelSelect.value = state.currentModel;
+              vscode.setState(state);
+              break;
+
+            case 'error':
+              setLoading(false);
+              vscode.postMessage({
+                type: 'showError',
+                message: message.message,
+              });
+              break;
+          }
+        });
+      })();
     </script>
-</body>
+  </body>
 </html>

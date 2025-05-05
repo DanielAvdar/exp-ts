@@ -11,10 +11,12 @@ install-and-compile: install compile
 # Install dependencies
 install:
 	npm install
-	npm run compile
+
 # Compile the extension
 compile:
 	npm run compile
+	pre-commit install
+
 
 # Watch for changes
 watch: install
@@ -37,21 +39,9 @@ format:
 	npm run format || npx prettier --write .
 
 # Run checks (linting and tests)
-check: lint test
+check:
+	pre-commit run --all-files
 
-# Set up git pre-commit hooks
-pre-commit-setup:
-	@echo "Setting up git pre-commit hooks..."
-ifeq ($(OS),Windows_NT)
-	@mkdir -p .git\hooks
-	@copy pre-commit.bat .git\hooks\pre-commit
-	@echo "Git pre-commit hooks installed successfully"
-else
-	@mkdir -p .git/hooks
-	@cp pre-commit.sh .git/hooks/pre-commit
-	@chmod +x .git/hooks/pre-commit
-	@echo "Git pre-commit hooks installed successfully"
-endif
 
 # Clean up generated files
 clean:
