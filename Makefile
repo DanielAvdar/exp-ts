@@ -15,7 +15,7 @@ install:
 # Compile the extension
 compile:
 	npm run compile
-	uvx pre-commit install
+	pre-commit install
 
 # Watch for changes
 watch: install
@@ -57,7 +57,7 @@ ci-check: test-unit lint
 
 # Run checks (linting and tests)
 check:
-	uvx pre-commit run --all-files
+	pre-commit run --all-files
 
 # Clean up generated files
 clean:
