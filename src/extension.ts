@@ -11,11 +11,45 @@ import { LocalProvider } from './providers/local-provider';
 export function activate(context: vscode.ExtensionContext) {
   console.log('LLM Chat extension is now active');
 
+  // Debug information
+  console.log(`Available commands: ${vscode.commands.getCommands().then(cmds => cmds.join(', '))}`);
+  console.log(`Extension path: ${context.extensionPath}`);
+
+  // Create a status bar item
+  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBarItem.text = '$(comment-discussion) LLM Chat';
+  statusBarItem.command = 'vsc-chat.openChat';
+  statusBarItem.tooltip = 'Open LLM Chat UI';
+  statusBarItem.show();
+  context.subscriptions.push(statusBarItem);
+
+  // Show notification that extension is active
+  vscode.window
+    .showInformationMessage('LLM Chat extension is now active. Click to open chat UI.', 'Open Chat')
+    .then(selection => {
+      if (selection === 'Open Chat') {
+        vscode.commands.executeCommand('vsc-chat.openChat');
+      }
+    });
+
+  // Automatically open chat UI in development mode
+  setTimeout(() => {
+    vscode.commands.executeCommand('vsc-chat.openChat');
+  }, 1000);
+
   // Create provider instances
   const providers = new Map<string, LLMProvider>();
   providers.set('openai', new OpenAIProvider());
   providers.set('anthropic', new AnthropicProvider());
   providers.set('local', new LocalProvider());
+
+  // For development mode, automatically open chat UI
+  if (
+    process.env.VSCODE_DEBUG_MODE === 'true' ||
+    vscode.env.sessionId?.includes('extension-development-host')
+  ) {
+    vscode.commands.executeCommand('vsc-chat.openChat');
+  }
 
   // Track currently active provider
   let currentProvider: LLMProvider | undefined;
