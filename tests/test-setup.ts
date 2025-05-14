@@ -1,6 +1,9 @@
 // Basic test setup for unit tests
 import * as path from 'path';
 import * as sinon from 'sinon';
+// Fix the import error by using require for module-alias since TypeScript has issues with the typings
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const moduleAlias = require('module-alias');
 
 // Create our mock VS Code module before any imports can use it
 const mockVscode = {
@@ -41,11 +44,10 @@ const mockVscode = {
 };
 
 // Make the mock available to tests
-(global as any).vscode = mockVscode;
+(global as unknown as Record<string, unknown>).vscode = mockVscode;
 
 // Set up module aliases for testing
-require('module-alias/register');
-require('module-alias').addAlias('@src', path.join(__dirname, '../src'));
-require('module-alias').addAlias('@providers', path.join(__dirname, '../src/providers'));
-require('module-alias').addAlias('@models', path.join(__dirname, '../src/models'));
-require('module-alias').addAlias('vscode', path.join(__dirname, './mocks/vscode-mock.js'));
+moduleAlias.addAlias('@src', path.join(__dirname, '../src'));
+moduleAlias.addAlias('@providers', path.join(__dirname, '../src/providers'));
+moduleAlias.addAlias('@models', path.join(__dirname, '../src/models'));
+moduleAlias.addAlias('vscode', path.join(__dirname, './mocks/vscode-mock.js'));

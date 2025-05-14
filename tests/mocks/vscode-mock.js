@@ -1,3 +1,6 @@
+/* eslint-env node */
+/* global module */
+
 // Mock VS Code module for standalone unit tests
 const vscode = {
   window: {
@@ -56,4 +59,7 @@ const vscode = {
   },
 };
 
-module.exports = vscode;
+// Use self-contained export for Node.js environment compatibility
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = vscode;
+}

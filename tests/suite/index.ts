@@ -29,9 +29,9 @@ export function run(): Promise<void> {
           c();
         }
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      e(err);
+      e(err instanceof Error ? err : new Error(String(err)));
     }
   });
 }

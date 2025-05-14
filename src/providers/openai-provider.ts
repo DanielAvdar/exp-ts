@@ -1,5 +1,4 @@
 import axios from 'axios';
-import * as vscode from 'vscode';
 import { ChatCompletionRequest, ChatCompletionResponse, ProviderSettings } from '../models/chat';
 import { LLMProvider } from './provider';
 import { IConfigProvider, VsCodeConfigProvider } from '../services/config-provider';

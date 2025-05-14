@@ -3,7 +3,7 @@ import '../test-setup';
 import { OpenAIProvider, OpenAIApiClient } from '../../src/providers/openai-provider';
 import { MockConfigProvider } from '../mocks/config-provider-mock';
 import * as sinon from 'sinon';
-import { ChatCompletionRequest, ChatCompletionResponse, ChatMessage } from '../../src/models/chat';
+import { ChatCompletionRequest, ChatCompletionResponse } from '../../src/models/chat';
 
 describe('OpenAIProvider', () => {
   let provider: OpenAIProvider;
@@ -19,7 +19,7 @@ describe('OpenAIProvider', () => {
 
     // Replace the real API client with a stubbed one
     apiClientStub = sinon.createStubInstance(OpenAIApiClient);
-    (provider as any).apiClient = apiClientStub;
+    (provider as unknown as { apiClient: typeof apiClientStub }).apiClient = apiClientStub;
   });
 
   afterEach(() => {
@@ -39,7 +39,7 @@ describe('OpenAIProvider', () => {
       // Set up a provider with no API key
       mockConfig = new MockConfigProvider(undefined);
       provider = new OpenAIProvider(mockConfig);
-      (provider as any).apiClient = apiClientStub;
+      (provider as unknown as { apiClient: typeof apiClientStub }).apiClient = apiClientStub;
 
       await provider.initialize();
 
@@ -55,7 +55,7 @@ describe('OpenAIProvider', () => {
       // Set up a provider that will simulate cancellation
       mockConfig = new MockConfigProvider('simulate-cancel');
       provider = new OpenAIProvider(mockConfig);
-      (provider as any).apiClient = apiClientStub;
+      (provider as unknown as { apiClient: typeof apiClientStub }).apiClient = apiClientStub;
 
       // Force settings to have no API key to trigger the prompt
       provider.settings.apiKey = undefined;
@@ -87,7 +87,7 @@ describe('OpenAIProvider', () => {
       // Set up a provider with no API key
       mockConfig = new MockConfigProvider(undefined);
       provider = new OpenAIProvider(mockConfig);
-      (provider as any).apiClient = apiClientStub;
+      (provider as unknown as { apiClient: typeof apiClientStub }).apiClient = apiClientStub;
 
       // Set up the stub to return some models
       apiClientStub.fetchModels.resolves(['model1', 'model2']);

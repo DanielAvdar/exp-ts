@@ -4,7 +4,7 @@ import { OpenAIApiClient } from '../../src/providers/openai-provider';
 import * as sinon from 'sinon';
 import axios from 'axios';
 import AxiosMockAdapter from 'axios-mock-adapter';
-import { ChatCompletionRequest, ChatCompletionResponse } from '../../src/models/chat';
+import { ChatCompletionRequest } from '../../src/models/chat';
 
 describe('OpenAIApiClient', () => {
   let apiClient: OpenAIApiClient;

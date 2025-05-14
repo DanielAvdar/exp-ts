@@ -15,7 +15,7 @@ install:
 # Compile the extension
 compile:
 	npm run compile
-	pre-commit install
+	uvx pre-commit install
 
 # Watch for changes
 watch: install
@@ -24,6 +24,7 @@ watch: install
 # Run unit tests only (no VS Code window)
 test: test-unit
 
+cov: coverage-unit
 # Run unit tests only (no VS Code window)
 test-unit: compile
 	npm run test:unit
@@ -56,7 +57,7 @@ ci-check: test-unit lint
 
 # Run checks (linting and tests)
 check:
-	pre-commit run --all-files
+	uvx pre-commit run --all-files
 
 # Clean up generated files
 clean:

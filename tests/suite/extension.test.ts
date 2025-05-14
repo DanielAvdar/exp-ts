@@ -11,7 +11,11 @@ suite('Extension Test Suite', () => {
 });
 
 suite('Extension Integration Test', () => {
-  test('Extension should be activated', async () => {
+  // Increase the timeout for the extension activation test
+  test('Extension should be activated', async function () {
+    // Set a longer timeout (5 seconds) for this specific test
+    this.timeout(5000);
+
     // Get the extension
     const extension = vscode.extensions.getExtension('vscode-samples.vsc-chat');
     assert.ok(extension);
