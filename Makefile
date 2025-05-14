@@ -1,6 +1,6 @@
 # Makefile for VS Code Extension
 
-.PHONY: all install test test-unit test-intg lint format check pre-commit-setup clean compile watch help coverage coverage-unit coverage-intg clean-test-output
+.PHONY: all install test test-unit test-intg lint format check pre-commit-setup clean compile watch help coverage coverage-unit coverage-intg clean-test-output dev
 
 # Default target
 all: install-and-compile
@@ -15,7 +15,6 @@ install:
 # Compile the extension
 compile:
 	npm run compile
-	pre-commit install
 
 # Watch for changes
 watch: install
@@ -55,9 +54,7 @@ format:
 # Check for CI (run unit tests without VS Code window)
 ci-check: test-unit lint
 
-# Run checks (linting and tests)
-check:
-	pre-commit run --all-files
+
 
 # Clean up generated files
 clean:
@@ -82,6 +79,10 @@ else
 	rm -rf out/tests
 	mkdir -p out/tests/suite
 endif
+
+# Launch VS Code Extension Development Host for manual UI exploration
+dev: compile
+	code --new-window --extensionDevelopmentPath=. .
 
 # Help
 help:
