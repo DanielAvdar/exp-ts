@@ -1,108 +1,142 @@
 {
-	"name": "vsc-chat",
-	"displayName": "VS Code LLM Chat",
-	"description": "Chat with multiple LLM providers directly within VS Code",
-	"version": "0.0.1",
-	"publisher": "vscode-samples",
-	"repository": "https://github.com/Microsoft/vscode-extension-samples/helloworld-sample",
-	"engines": {
-		"vscode": "^1.74.0"
-	},
-	"categories": [
-		"Other"
-	],
-	"activationEvents": [],
-	"main": "./out/extension.js",
-	"contributes": {
-		"commands": [
-			{
-				"command": "vsc-chat.openChat",
-				"title": "Open LLM Chat"
-			},
-			{
-				"command": "vsc-chat.selectProvider",
-				"title": "Select LLM Provider"
-			}
-		],
-		"viewsContainers": {
-			"panel": [
-				{
-					"id": "llm-chat-panel",
-					"title": "LLM Chat",
-					"icon": "$(comment-discussion)"
-				}
-			]
-		},
-		"views": {
-			"llm-chat-panel": [
-				{
-					"id": "llm-chat-view",
-					"name": "Chat"
-				}
-			]
-		},
-		"configuration": {
-			"title": "LLM Chat",
-			"properties": {
-				"vsc-chat.defaultProvider": {
-					"type": "string",
-					"default": "openai",
-					"enum": [
-						"openai",
-						"anthropic",
-						"local"
-					],
-					"enumDescriptions": [
-						"OpenAI (ChatGPT, GPT-4)",
-						"Anthropic (Claude)",
-						"Local models (Ollama, etc.)"
-					],
-					"description": "Default LLM provider to use"
-				},
-				"vsc-chat.openai.apiKey": {
-					"type": "string",
-					"default": "",
-					"description": "API key for OpenAI"
-				},
-				"vsc-chat.anthropic.apiKey": {
-					"type": "string",
-					"default": "",
-					"description": "API key for Anthropic"
-				},
-				"vsc-chat.local.endpoint": {
-					"type": "string",
-					"default": "http://localhost:11434",
-					"description": "Endpoint for local model (e.g., Ollama)"
-				}
-			}
-		}
-	},
-	"scripts": {
-		"vscode:prepublish": "npm run compile",
-		"compile": "tsc -p ./",
-		"watch": "tsc -watch -p ./",
-		"pretest": "npm run compile",
-		"test": "vscode-test",
-		"coverage": "nyc npm run test",
-		"lint": "eslint src --ext ts"
-	},
-	"dependencies": {
-		"axios": "^1.6.0",
-		"marked": "^11.1.0"
-	},
-	"devDependencies": {
-		"@eslint/js": "^9.13.0",
-		"@istanbuljs/nyc-config-typescript": "^1.0.2",
-		"@stylistic/eslint-plugin": "^2.9.0",
-		"@types/mocha": "^10.0.1",
-		"@types/node": "^20",
-		"@types/vscode": "^1.73.0",
-		"@vscode/test-cli": "^0.0.8",
-		"@vscode/test-electron": "^2.3.9",
-		"eslint": "^9.13.0",
-		"mocha": "^10.2.0",
-		"nyc": "^15.1.0",
-		"typescript": "^5.8.2",
-		"typescript-eslint": "^8.26.0"
-	}
+  "name": "vsc-chat",
+  "displayName": "VS Code LLM Chat",
+  "description": "Chat with multiple LLM providers directly within VS Code",
+  "version": "0.0.1",
+  "publisher": "vscode-samples",
+  "repository": "https://github.com/Microsoft/vscode-extension-samples/helloworld-sample",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:vsc-chat.openChat",
+    "onCommand:vsc-chat.selectProvider",
+    "*"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "vsc-chat.openChat",
+        "title": "Open LLM Chat"
+      },
+      {
+        "command": "vsc-chat.selectProvider",
+        "title": "Select LLM Provider"
+      }
+    ],
+    "viewsContainers": {
+      "panel": [
+        {
+          "id": "llm-chat-panel",
+          "title": "LLM Chat",
+          "icon": "$(comment-discussion)"
+        }
+      ]
+    },
+    "views": {
+      "llm-chat-panel": [
+        {
+          "id": "llm-chat-view",
+          "name": "Chat"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "LLM Chat",
+      "properties": {
+        "vsc-chat.defaultProvider": {
+          "type": "string",
+          "default": "openai",
+          "enum": [
+            "openai",
+            "anthropic",
+            "local"
+          ],
+          "enumDescriptions": [
+            "OpenAI (ChatGPT, GPT-4)",
+            "Anthropic (Claude)",
+            "Local models (Ollama, etc.)"
+          ],
+          "description": "Default LLM provider to use"
+        },
+        "vsc-chat.openai.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for OpenAI"
+        },
+        "vsc-chat.anthropic.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for Anthropic"
+        },
+        "vsc-chat.local.endpoint": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "Endpoint for local model (e.g., Ollama)"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "compile:tests": "tsc -p ./tests/tsconfig.test.json",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile",
+    "test": "vscode-test",
+    "test:unit": "mocha -r ts-node/register 'tests/unit/**/*.test.ts'",
+    "test:unit:coverage": "nyc npm run test:unit",
+    "test:integration": "npm run compile:tests && vscode-test --extensionDevelopmentPath=. --extensionTestsPath=./out/tests/suite/index",
+    "test:integration:coverage": "nyc npm run test:integration",
+    "coverage": "nyc npm run test",
+    "lint": "eslint src --ext ts",
+    "format": "prettier --write .",
+    "check-all": "npm run lint && npm run test:unit",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "marked": "^11.1.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.13.0",
+    "@istanbuljs/nyc-config-typescript": "^1.0.2",
+    "@stylistic/eslint-plugin": "^2.9.0",
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.1",
+    "@types/module-alias": "^2.0.4",
+    "@types/node": "^20",
+    "@types/sinon": "^17.0.4",
+    "@types/vscode": "^1.73.0",
+    "@vscode/test-cli": "^0.0.8",
+    "@vscode/test-electron": "^2.3.9",
+    "axios-mock-adapter": "^2.1.0",
+    "eslint": "^9.13.0",
+    "glob": "^11.0.2",
+    "husky": "^9.1.7",
+    "jest": "^29.7.0",
+    "lint-staged": "^15.5.1",
+    "mocha": "^10.2.0",
+    "module-alias": "^2.2.3",
+    "nyc": "^15.1.0",
+    "prettier": "^3.5.3",
+    "sinon": "^20.0.0",
+    "source-map-support": "^0.5.21",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.26.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,html,css}": [
+      "prettier --write"
+    ]
+  }
 }

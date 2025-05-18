@@ -1,9 +1,12 @@
 # Makefile for VS Code Extension
 
-.PHONY: all install test lint format check pre-commit-setup clean compile watch help coverage
+.PHONY: all install test test-unit test-intg lint format check pre-commit-setup clean compile watch help coverage coverage-unit coverage-intg clean-test-output
 
 # Default target
-all: compile
+all: install-and-compile
+
+# Install dependencies and compile (new default target)
+install-and-compile: install compile
 
 # Install dependencies
 install:
@@ -14,16 +17,31 @@ compile:
 	npm run compile
 
 # Watch for changes
-watch:
+watch: install
 	npm run watch
 
-# Run tests
-test: compile
-	npm run test
+# Run unit tests only (no VS Code window)
+test: test-unit
 
-# Run tests with coverage
-coverage: compile
-	npm run coverage
+cov: coverage-unit
+# Run unit tests only (no VS Code window)
+test-unit: compile
+	npm run test:unit
+
+# Run integration tests with VS Code window (clean build first to avoid unit test conflicts)
+test-intg: clean-test-output compile
+	npm run test:integration
+
+# Run unit tests with coverage
+coverage-unit: compile
+	npm run test:unit:coverage
+
+# Run integration tests with coverage (full tests including VS Code window)
+coverage-intg: compile
+	npm run test:integration:coverage
+
+# Run all tests with coverage
+coverage: coverage-unit
 
 # Run linting
 lint:
@@ -33,22 +51,14 @@ lint:
 format:
 	npm run format || npx prettier --write .
 
-# Run checks (linting and tests)
-check: lint test
+# Check for CI (run unit tests without VS Code window)
+ci-check: test-unit lint
 
-# Set up git pre-commit hooks
-pre-commit-setup:
-	@echo "Setting up git pre-commit hooks..."
-ifeq ($(OS),Windows_NT)
-	@mkdir -p .git\hooks
-	@copy pre-commit.bat .git\hooks\pre-commit
-	@echo "Git pre-commit hooks installed successfully"
-else
-	@mkdir -p .git/hooks
-	@cp pre-commit.sh .git/hooks/pre-commit
-	@chmod +x .git/hooks/pre-commit
-	@echo "Git pre-commit hooks installed successfully"
-endif
+# Run code quality checks (linting, formatting, and pre-commit hooks)
+check:
+	npm run lint
+	npm run format
+	npx lint-staged
 
 # Clean up generated files
 clean:
@@ -64,18 +74,33 @@ else
 	rm -rf .nyc_output
 endif
 
+# Clean all test output files
+clean-test-output:
+ifeq ($(OS),Windows_NT)
+	if exist out\tests rmdir /s /q out\tests
+	mkdir out\tests\suite
+else
+	rm -rf out/tests
+	mkdir -p out/tests/suite
+endif
+
 # Help
 help:
 	@echo "Available commands:"
 	@echo "  make              - Compile TypeScript code (default)"
 	@echo "  make install      - Install dependencies"
+	@echo "  make install-and-compile - Install dependencies and compile TypeScript code"
 	@echo "  make compile      - Compile TypeScript code"
 	@echo "  make watch        - Watch for changes and compile automatically"
-	@echo "  make test         - Run tests (compiles first)"
-	@echo "  make coverage     - Run tests with code coverage reports"
+	@echo "  make test         - Run unit tests (no VS Code window) [alias for test-unit]"
+	@echo "  make test-unit    - Run unit tests (no VS Code window)"
+	@echo "  make test-intg    - Run integration tests with VS Code window"
+	@echo "  make coverage     - Run unit tests with coverage reports [alias for coverage-unit]"
+	@echo "  make coverage-unit - Run unit tests with coverage reports"
+	@echo "  make coverage-intg - Run integration tests with coverage reports"
+	@echo "  make ci-check     - Run checks for CI (unit tests and lint)"
 	@echo "  make lint         - Run linting"
 	@echo "  make format       - Format code"
-	@echo "  make check        - Run linting and tests"
-	@echo "  make pre-commit-setup - Set up git pre-commit hooks"
+	@echo "  make check        - Run code quality checks (linting, formatting, and pre-commit hooks)"
 	@echo "  make clean        - Remove generated files"
 	@echo "  make help         - Show this help message"
