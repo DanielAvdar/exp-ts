@@ -1,6 +1,6 @@
 # Makefile for VS Code Extension
 
-.PHONY: all install test test-unit test-intg lint format check pre-commit-setup clean compile watch help coverage coverage-unit coverage-intg clean-test-output dev
+.PHONY: all install test test-unit test-intg lint format check pre-commit-setup clean compile watch help coverage coverage-unit coverage-intg clean-test-output
 
 # Default target
 all: install-and-compile
@@ -54,7 +54,11 @@ format:
 # Check for CI (run unit tests without VS Code window)
 ci-check: test-unit lint
 
-
+# Run code quality checks (linting, formatting, and pre-commit hooks)
+check:
+	npm run lint
+	npm run format
+	npx lint-staged
 
 # Clean up generated files
 clean:
@@ -80,10 +84,6 @@ else
 	mkdir -p out/tests/suite
 endif
 
-# Launch VS Code Extension Development Host for manual UI exploration
-dev: compile
-	code --new-window --extensionDevelopmentPath=. .
-
 # Help
 help:
 	@echo "Available commands:"
@@ -101,6 +101,6 @@ help:
 	@echo "  make ci-check     - Run checks for CI (unit tests and lint)"
 	@echo "  make lint         - Run linting"
 	@echo "  make format       - Format code"
-	@echo "  make check        - Run linting and tests"
+	@echo "  make check        - Run code quality checks (linting, formatting, and pre-commit hooks)"
 	@echo "  make clean        - Remove generated files"
 	@echo "  make help         - Show this help message"
