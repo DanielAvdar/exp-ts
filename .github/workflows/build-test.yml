@@ -1,0 +1,101 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ] # Adjust branches as needed
+  pull_request:
+    branches: [ main, develop ] # Adjust branches as needed
+
+jobs:
+  build-and-test:
+    name: Build & Test Projects on ${{ matrix.os }} with Node ${{ matrix.node-version }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false # Allow other jobs in the matrix to continue if one fails
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        node-version: [18.x, 20.x] # Example: LTS and current
+        # Can add exclude configurations if some combinations are not needed/supported
+        # exclude:
+        #   - os: windows-latest
+        #     node-version: 18.x
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          # No top-level cache path here, as we handle it per project.
+          # Caching for npm ci can be implicitly handled by setup-node if lockfiles are present
+          # or explicitly configured per step if needed.
+          # For simplicity, relying on setup-node's general caching if package-lock.json exists.
+
+      # --- Core UI Steps ---
+      - name: Install Core UI Dependencies
+        working-directory: ./core-ui
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Test Core UI
+        working-directory: ./core-ui
+        run: npm test
+
+      - name: Build Core UI
+        working-directory: ./core-ui
+        run: npm run build
+
+      - name: Archive Core UI Build Artifact
+        uses: actions/upload-artifact@v4 # Updated to v4
+        with:
+          name: core-ui-dist-${{ matrix.node-version }}
+          path: core-ui/dist/
+
+      # --- VS Code Extension Steps ---
+      # Note on core-ui-bundle:
+      # For the `package-vsix` step to create a complete .vsix, the core-ui build output
+      # (from core-ui/dist) would need to be copied into vscode-extension/core-ui-bundle
+      # before `npm run package-vsix` is executed.
+      # This workflow does not currently perform that copy. It tests the packaging process itself.
+      # A future step could be:
+      # - name: Prepare core-ui-bundle for VS Code Extension
+      #   run: |
+      #     mkdir -p vscode-extension/core-ui-bundle
+      #     cp -r core-ui/dist/* vscode-extension/core-ui-bundle/
+
+      - name: Install VS Code Extension Dependencies
+        working-directory: ./vscode-extension
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Test VS Code Extension
+        working-directory: ./vscode-extension
+        run: npm test
+
+      # The `compile` step is part of the `package-vsix` script.
+      # Explicitly running it here would be redundant unless needed for other purposes.
+      # - name: Compile VS Code Extension
+      #   working-directory: ./vscode-extension
+      #   run: npm run compile
+
+      - name: Package VS Code Extension
+        working-directory: ./vscode-extension
+        run: npm run package-vsix
+
+      - name: Archive VS Code Extension Artifact (.vsix)
+        uses: actions/upload-artifact@v4 # Updated to v4
+        with:
+          name: vscode-extension-vsix-${{ matrix.node-version }}
+          path: vscode-extension/*.vsix # Path to the generated .vsix file
+          if-no-files-found: error # Fail the step if .vsix is not found
+```

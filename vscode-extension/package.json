@@ -1,0 +1,41 @@
+{
+  "name": "langgraph-chat-ui",
+  "displayName": "LangGraph Chat UI",
+  "description": "A chat interface for interacting with Python LangGraph services.",
+  "version": "0.0.1",
+  "publisher": "your-publisher-name",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:langgraph-chat-ui.startChat"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "langgraph-chat-ui.startChat",
+        "title": "Start LangGraph Chat"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "jest",
+    "package-vsix": "npm run compile && vsce package --no-dependencies",
+    "lint": "echo \"Linting vscode-extension... (setup linter e.g., ESLint)\" && exit 0"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.11",
+    "@types/vscode": "^1.80.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.0.0",
+    "vsce": "^2.15.0"
+  }
+}
