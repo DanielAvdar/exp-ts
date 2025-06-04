@@ -1,0 +1,50 @@
+# Dependencies
+node_modules
+
+# Source TypeScript files (compiled output in 'out' will be included)
+src
+
+# Test files from compiled output
+out/**/*.test.js
+out/test/**
+
+# VSIX package file
+*.vsix
+
+# OS-specific files
+.DS_Store
+
+# Development configuration files
+tsconfig.json
+jest.config.js
+webpack.config.js # If you were using webpack
+
+# Git files and folders (usually handled by .gitignore but good to have for vsce)
+.git
+.gitattributes
+.github
+.gitignore
+
+# Files related to VS Code development environment specific to this project
+.vscode/**
+!.vscode/launch.json # Often useful to keep launch.json for debugging published extension
+!.vscode/settings.json # Keep project specific settings if any
+!.vscode/extensions.json # Keep recommended extensions if any
+.vscode-test/
+
+# Ensure the bundled UI IS included.
+# If core-ui-bundle is at the root, it's typically included by default
+# unless a very broad pattern above excludes it.
+# Explicitly un-ignoring it can be done if needed, but usually not necessary
+# with a minimal .vscodeignore like this.
+# !core-ui-bundle/**
+
+# Other common exclusions
+# yarn.lock
+# pnpm-lock.yaml
+# package-lock.json (if not a production dependency, though vsce might use it)
+# .npmrc
+# Readme files or docs not intended for the package
+# README.md
+# CONTRIBUTING.md
+# CHANGELOG.md (unless you want it in the package)
